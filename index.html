@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login & Register Page</title>
+  <!-- Firebase SDK -->
+  <script type="module">
+    // Import Firebase from Firebase CDN
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+    import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
+    import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+
+    // Firebase config from Firebase Console
+    const firebaseConfig = {
+      apiKey: "AIzaSyD75pX0R0qc8sRbNuZehA0maVaBYtr92f8",
+      authDomain: "login-demo-c287e.firebaseapp.com",
+      projectId: "login-demo-c287e",
+      storageBucket: "login-demo-c287e.appspot.com",
+      messagingSenderId: "959143650921",
+      appId: "1:959143650921:web:c7a1bb44a3bba7c62d64f8",
+      measurementId: "G-QY6F3RH8PR"
+    };
+
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    // Handle login form submission
+    document.getElementById("loginForm").addEventListener("submit", (event) => {
+      event.preventDefault();
+
+      const email = document.getElementById("email").value;
+      const password = document.getElementById("password").value;
+
+      // Sign in the user with Firebase Authentication
+      signInWithEmailAndPassword(auth, email, password)
+        .then(() => {
+          // Successful login, redirect to dashboard
+          window.location.href = "dashboard.html"; // Redirect to a dashboard page
+        })
+        .catch((error) => {
+          const errorMessage = error.message;
+          document.getElementById("error-message").textContent = errorMessage;
+          document.getElementById("error-message").style.display = "block"; // Show error message
+        });
+    });
+
+    // Handle sign-up form submission
+    document.getElementById("signUpForm").addEventListener("submit", async (event) => {
+      event.preventDefault();
+
+      const name = document.getElementById("signUpName").value;
+      const email = document.getElementById("signUpEmail").value;
+      const mobileNumber = document.getElementById("signUpMobile").value;
+      const password = document.getElementById("signUpPassword").value;
+
+      try {
+        // Create new user with Firebase Authentication
+        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+        const user = userCredential.user;
+
+        // Store additional user details (Name, Email, Mobile Number) in Firestore
+        const userDocRef = doc(db, "users", user.uid); // Set the document using the UID
+        await setDoc(userDocRef, {
+          uid: user.uid,
+          name: name,
+          email: email,
+          mobileNumber: mobileNumber,
+        });
+
+        alert("Account created successfully!");
+        window.location.href = "dashboard.html"; // Redirect to a new page after successful sign-up
+      } catch (error) {
+        const errorCode = error.code;
+        const errorMessage = error.message;
+
+        // Check for email already in use
+        if (errorCode === 'auth/email-already-in-use') {
+          document.getElementById("signUpErrorMessage").textContent = "The email address is already in use. Please use a different email.";
+        } else {
+          document.getElementById("signUpErrorMessage").textContent = errorMessage;
+        }
+
+        document.getElementById("signUpErrorMessage").style.display = "block"; // Show error message
+      }
+    });
+  </script>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      background-color: #f4f4f4;
+    }
+    .form-container {
+      background-color: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      width: 300px;
+    }
+    input {
+      margin-bottom: 10px;
+      padding: 10px;
+      width: 100%;
+      box-sizing: border-box;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+    button {
+      padding: 10px;
+      width: 100%;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #0056b3;
+    }
+    p {
+      color: red;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="form-container">
+    <!-- Login Form -->
+    <h2>Login</h2>
+    <form id="loginForm">
+      <input type="email" id="email" placeholder="Email" required><br>
+      <input type="password" id="password" placeholder="Password" required><br>
+      <button type="submit">Login</button>
+    </form>
+    <p id="error-message"></p>
+    <br>
+
+    <!-- Sign Up Form -->
+    <h2>Sign Up</h2>
+    <form id="signUpForm">
+      <input type="text" id="signUpName" placeholder="Full Name" required><br>
+      <input type="email" id="signUpEmail" placeholder="Email" required><br>
+      <input type="text" id="signUpMobile" placeholder="Mobile Number" required><br>
+      <input type="password" id="signUpPassword" placeholder="Password" required><br>
+      <button type="submit">Sign Up</button>
+    </form>
+    <p id="signUpErrorMessage"></p>
+  </div>
+
+</body>
+</html>

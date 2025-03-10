@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard</title>
+</head>
+<body>
+  <h1>Welcome to the Dashboard</h1>
+  <button id="logoutButton">Logout</button>
+
+  <script>
+    // Initialize Firebase
+    const auth = firebase.auth();
+
+    // Log out the user when the "Logout" button is clicked
+    document.getElementById("logoutButton").addEventListener("click", () => {
+      auth.signOut().then(() => {
+        // Redirect to login page after logout
+        window.location.href = "index.html";
+      });
+    });
+  </script>
+</body>
+</html>
